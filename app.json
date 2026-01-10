@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WakeWhere",
-    "slug": "WakeWhere",
+    "slug": "wakewhere",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -43,6 +43,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "98cee1fb-552c-4240-afd1-764dcb4c6bbd"
+      }
+    },
+    "owner": "harishgm"
   }
 }
