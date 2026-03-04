@@ -5,6 +5,7 @@ export function SavedConfigCard({
   lat = "0.0000",
   lon = "0.0000",
   thres = "500",
+  onEdit,
 }) {
   return (
     <View className="border border-gray-200 bg-white rounded-lg p-4 gap-3 w-full">
@@ -29,7 +30,14 @@ export function SavedConfigCard({
 
       <View className="flex-row gap-3 mt-2">
         <Pressable className="flex-1 bg-blue-500 py-2 rounded-lg items-center">
-          <Text className="text-white font-medium">Start Tracking</Text>
+          <Text className="text-white font-medium">Start</Text>
+        </Pressable>
+
+        <Pressable
+          className="flex-1 border border-gray-400 py-2 rounded-lg items-center"
+          onPress={onEdit}
+        >
+          <Text className="font-medium">Edit</Text>
         </Pressable>
 
         <Pressable className="flex-1 border border-red-500 py-2 rounded-lg items-center">
