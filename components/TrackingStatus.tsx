@@ -9,38 +9,37 @@ export function TrackingStatus({
   dist = "1.5",
 }) {
   return (
-    <View className="border bg-white rounded-xl p-4 gap-3 items-center">
-      <Text className="text-lg mb-3 font-bold">Tracking Status</Text>
+    <View className="border border-gray-200 bg-white rounded-xl p-4 gap-4">
+      <Text className="text-lg font-bold">Tracking Status</Text>
 
       {isTracking ? (
         <>
-          <View>
-            <Text className="text-base font-semibold">{configName}</Text>
-          </View>
+          <Text className="text-base font-semibold">{configName}</Text>
 
-          <View className="flex-row justify-between gap-8">
+          <View className="flex-row justify-between">
             <View className="flex-row gap-2">
-              <Text className="text-gray-900">Lat</Text>
+              <Text className="text-gray-600">Lat</Text>
               <Text className="font-medium">{lat}</Text>
             </View>
+
             <View className="flex-row gap-2">
-              <Text className="text-gray-900">Lon</Text>
+              <Text className="text-gray-600">Lon</Text>
               <Text className="font-medium">{lon}</Text>
             </View>
           </View>
 
-          <View className="flex-row gap-4">
-            <Text className="text-gray-900">Threshold</Text>
+          <View className="flex-row justify-between">
+            <Text className="text-gray-600">Threshold</Text>
             <Text className="font-medium">{thres} m</Text>
           </View>
 
-          <View className="flex-row gap-4">
-            <Text className="text-gray-900">Distance</Text>
+          <View className="flex-row justify-between">
+            <Text className="text-gray-600">Distance</Text>
             <Text className="font-medium">{dist} km</Text>
           </View>
 
-          <Pressable className="mt-2 bg-red-500 py-2 px-8 rounded-lg items-center">
-            <Text className="text-white">Stop tracking</Text>
+          <Pressable className="mt-2 bg-red-500 py-2 rounded-lg items-center">
+            <Text className="text-white font-medium">Stop tracking</Text>
           </Pressable>
         </>
       ) : (

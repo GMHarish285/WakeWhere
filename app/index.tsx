@@ -1,25 +1,21 @@
-import { SavedConfigCard } from "@/components/SavedConfigCard";
+import { SavedConfig } from "@/components/SavedConfig";
 import { TrackingStatus } from "@/components/TrackingStatus";
-import { Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, View, ScrollView } from "react-native";
 
 export default function Index() {
   return (
-    <View className="flex-1 p-4 bg-gray-200 gap-4">
-      <View className="items-end">
-        <Text>Settings</Text>
-        <Text>+</Text>
-      </View>
+    <View className="flex-1 bg-gray-100 p-4 gap-5">
+      <ScrollView
+        className="flex-1 p-4"
+        contentContainerStyle={{ gap: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
 
-      <View>
-        {/* <Text>Not tracking any location</Text> */}
         <TrackingStatus />
-      </View>
-      
-      <View>
-        <Text>Saved Configs</Text>
-        {/* <Text>No saved configs yet</Text> */}
-        <SavedConfigCard />
-      </View>
+
+        <SavedConfig />
+      </ScrollView>
     </View>
   );
 }
