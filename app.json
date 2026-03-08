@@ -10,7 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.harishgm.wakewhere"
+      "bundleIdentifier": "com.harishgm.wakewhere",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to track your destination.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app tracks your location even when the app is in the background.",
+        "UIBackgroundModes": [
+          "location"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +28,14 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.harishgm.wakewhere"
+      "package": "com.harishgm.wakewhere",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",

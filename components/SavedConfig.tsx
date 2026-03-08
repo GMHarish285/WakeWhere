@@ -8,12 +8,16 @@ import { SavedConfigCard } from "./SavedConfigCard";
 
 type SavedConfigProps = {
   setActiveConfig: (config: Config) => void;
-  setDistance: (distance: number) => void;
+  setDist: (distance: number) => void;
+  setCurrentLat: (distance: number) => void;
+  setCurrentLon: (distance: number) => void;
 };
 
 export function SavedConfig({
   setActiveConfig,
-  setDistance,
+  setDist,
+  setCurrentLat,
+  setCurrentLon,
 }: SavedConfigProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [configs, setConfigs] = useState<Config[]>([]);
@@ -41,8 +45,12 @@ export function SavedConfig({
   function handleStartTracking(config: Config) {
     setActiveConfig(config);
 
-    startLocationTracking(config, (d) => {
-      setDistance(d);
+    startLocationTracking(config, ({ dist, lat, lon }) => {
+    //   console.log("Location update:", lat, lon, dist);
+
+      setDist(dist);
+      setCurrentLat(lat);
+      setCurrentLon(lon);
     });
   }
 

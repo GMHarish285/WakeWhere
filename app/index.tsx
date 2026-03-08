@@ -8,11 +8,15 @@ import { ScrollView, View } from "react-native";
 export default function Index() {
   const [activeConfig, setActiveConfig] = useState<Config | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [currentLat, setCurrentLat] = useState<number | null>(null);
+  const [currentLon, setCurrentLon] = useState<number | null>(null);
 
   function handleStopTracking() {
     stopLocationTracking();
     setActiveConfig(null);
     setDistance(null);
+    setCurrentLat(null);
+    setCurrentLon(null);
   }
 
   return (
@@ -22,11 +26,19 @@ export default function Index() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ gap: 15 }}
       >
-        <TrackingStatus config={activeConfig} dist={distance} onStop={handleStopTracking} />
+        <TrackingStatus
+          config={activeConfig}
+          dist={distance}
+          lat={currentLat}
+          lon={currentLon}
+          onStop={handleStopTracking}
+        />
 
         <SavedConfig
           setActiveConfig={setActiveConfig}
-          setDistance={setDistance}
+          setDist={setDistance}
+          setCurrentLat={setCurrentLat}
+          setCurrentLon={setCurrentLon}
         />
       </ScrollView>
     </View>
