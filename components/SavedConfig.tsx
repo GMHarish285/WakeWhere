@@ -1,3 +1,4 @@
+import { startLocationTracking } from "@/services/locationService";
 import { Config, deleteConfig, getConfigs } from "@/storage/configStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -5,7 +6,15 @@ import { Pressable, Text, View } from "react-native";
 import { CreateConfig } from "./CreateConfig";
 import { SavedConfigCard } from "./SavedConfigCard";
 
-export function SavedConfig() {
+type SavedConfigProps = {
+  setActiveConfig: (config: Config) => void;
+  setDistance: (distance: number) => void;
+};
+
+export function SavedConfig({
+  setActiveConfig,
+  setDistance,
+}: SavedConfigProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [configs, setConfigs] = useState<Config[]>([]);
   const [editingConfig, setEditingConfig] = useState<Config | null>(null);
@@ -27,6 +36,14 @@ export function SavedConfig() {
   async function handleEditConfig(config: Config) {
     setEditingConfig(config);
     setShowPopup(true);
+  }
+
+  function handleStartTracking(config: Config) {
+    setActiveConfig(config);
+
+    startLocationTracking(config, (d) => {
+      setDistance(d);
+    });
   }
 
   return (
@@ -52,6 +69,7 @@ export function SavedConfig() {
           config={config}
           onDelete={() => handleDeleteConfig(config.id)}
           onEdit={() => handleEditConfig(config)}
+          onStart={() => handleStartTracking(config)}
         />
       ))}
 

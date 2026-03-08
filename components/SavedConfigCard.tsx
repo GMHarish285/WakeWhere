@@ -36,7 +36,10 @@ export function SavedConfigCard({
       </View>
 
       <View className="flex-row gap-3 mt-2">
-        <Pressable className="flex-1 bg-blue-600 py-2 rounded-lg items-center">
+        <Pressable
+          className="flex-1 bg-blue-600 py-2 rounded-lg items-center"
+          onPress={onStart}
+        >
           <Text className="text-white font-medium">Start</Text>
         </Pressable>
 
