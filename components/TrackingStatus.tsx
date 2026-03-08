@@ -9,36 +9,38 @@ export function TrackingStatus({
   dist = "1.5",
 }) {
   return (
-    <View className="border border-gray-200 bg-white rounded-xl p-4 gap-4">
+    <View className="border border-gray-200 bg-white rounded-xl p-4 gap-5">
       <Text className="text-lg font-bold">Tracking Status</Text>
 
       {isTracking ? (
         <>
           <Text className="text-base font-semibold">{configName}</Text>
 
-          <View className="flex-row justify-between">
-            <View className="flex-row gap-2">
-              <Text className="text-gray-600">Lat</Text>
-              <Text className="font-medium">{lat}</Text>
+          <View className="px-10 gap-3">
+            <View className="flex-row justify-between">
+              <View className="flex-row gap-2">
+                <Text className="text-gray-600">Lat</Text>
+                <Text className="font-medium">{lat}</Text>
+              </View>
+
+              <View className="flex-row gap-2">
+                <Text className="text-gray-600">Lon</Text>
+                <Text className="font-medium">{lon}</Text>
+              </View>
             </View>
 
-            <View className="flex-row gap-2">
-              <Text className="text-gray-600">Lon</Text>
-              <Text className="font-medium">{lon}</Text>
+            <View className="flex-row justify-between">
+              <Text className="text-gray-600">Threshold</Text>
+              <Text className="font-medium">{thres} m</Text>
+            </View>
+
+            <View className="flex-row justify-between">
+              <Text className="text-gray-600">Distance</Text>
+              <Text className="font-medium">{dist} km</Text>
             </View>
           </View>
 
-          <View className="flex-row justify-between">
-            <Text className="text-gray-600">Threshold</Text>
-            <Text className="font-medium">{thres} m</Text>
-          </View>
-
-          <View className="flex-row justify-between">
-            <Text className="text-gray-600">Distance</Text>
-            <Text className="font-medium">{dist} km</Text>
-          </View>
-
-          <Pressable className="mt-2 bg-red-500 py-2 rounded-lg items-center">
+          <Pressable className="mt-2 bg-red-500 py-3 rounded-lg items-center">
             <Text className="text-white font-medium">Stop tracking</Text>
           </Pressable>
         </>

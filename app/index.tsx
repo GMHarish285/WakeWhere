@@ -1,17 +1,15 @@
 import { SavedConfig } from "@/components/SavedConfig";
 import { TrackingStatus } from "@/components/TrackingStatus";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, View, ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 
 export default function Index() {
   return (
-    <View className="flex-1 bg-gray-100 p-4 gap-5">
+    <View className="flex-1 bg-gray-100 px-4 py-2 gap-5">
       <ScrollView
-        className="flex-1 p-4"
-        contentContainerStyle={{ gap: 20 }}
+        className="flex-1 p-1"
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ gap: 15 }}
       >
-
         <TrackingStatus />
 
         <SavedConfig />
