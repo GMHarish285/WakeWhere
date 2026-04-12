@@ -1,7 +1,7 @@
-import { getActiveConfig, saveTrackingState } from "@/storage/configStorage";
+import { getActiveConfig, getAlarmTriggered, saveTrackingState, setAlarmTriggered } from "@/storage/configStorage";
 import * as TaskManager from "expo-task-manager";
-import { Alert } from "react-native";
-import { updateTrackingNotification } from "./notificationService";
+import { clearTrackingNotification, triggerAlarmNotification, updateTrackingNotification } from "./notificationService";
+import { stopLocationTracking } from "./locationService";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -28,8 +28,13 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   await updateTrackingNotification(dist);
 
-  if (dist <= activeConfig.thres) {
-    Alert.alert("Destination reached");
+  const alreadyTriggered = await getAlarmTriggered();
+
+  if (dist <= activeConfig.thres && !alreadyTriggered) {
+    await setAlarmTriggered(true);
+    await triggerAlarmNotification();
+    await stopLocationTracking();
+    await clearTrackingNotification();
   }
 });
 

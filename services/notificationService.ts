@@ -50,3 +50,15 @@ export async function updateTrackingNotification(dist: number){
 export async function clearTrackingNotification(){
     await Notifications.dismissNotificationAsync(NOTIFICATION_ID);
 }
+
+export async function triggerAlarmNotification() {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Destination Reached!",
+      body: "You have arrived at your destination.",
+      sound: true,
+      priority: Notifications.AndroidNotificationPriority.MAX,
+    },
+    trigger: null,
+  });
+}

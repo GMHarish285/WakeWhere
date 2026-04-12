@@ -1,5 +1,6 @@
 import {
   clearActiveConfig,
+  clearAlarmTriggered,
   Config,
   saveActiveConfig,
 } from "@/storage/configStorage";
@@ -77,6 +78,8 @@ export async function startLocationTracking(config: Config) {
   });
 
   await updateTrackingNotification(0);
+
+  await clearAlarmTriggered();
 }
 
 export async function stopLocationTracking() {

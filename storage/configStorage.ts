@@ -99,3 +99,18 @@ export async function getTrackingState(): Promise<TrackingState | null> {
 export async function clearTrackingState() {
   await AsyncStorage.removeItem(TRACKING_STATE_KEY);
 }
+
+const ALARM_TRIGGERED_KEY = "alarmTriggered";
+
+export async function setAlarmTriggered(value: boolean) {
+  await AsyncStorage.setItem(ALARM_TRIGGERED_KEY, JSON.stringify(value));
+}
+
+export async function getAlarmTriggered(): Promise<boolean> {
+  const data = await AsyncStorage.getItem(ALARM_TRIGGERED_KEY);
+  return data ? JSON.parse(data) : false;
+}
+
+export async function clearAlarmTriggered() {
+  await AsyncStorage.removeItem(ALARM_TRIGGERED_KEY);
+}
