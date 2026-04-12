@@ -10,9 +10,13 @@ export default function Index() {
   const [distance, setDistance] = useState<number | null>(null);
   const [currentLat, setCurrentLat] = useState<number | null>(null);
   const [currentLon, setCurrentLon] = useState<number | null>(null);
+  const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
 
   function handleStopTracking() {
     stopLocationTracking();
+    if (stopPollingFn) {
+      stopPollingFn();
+    }
     setActiveConfig(null);
     setDistance(null);
     setCurrentLat(null);
@@ -39,6 +43,7 @@ export default function Index() {
           setDist={setDistance}
           setCurrentLat={setCurrentLat}
           setCurrentLon={setCurrentLon}
+          onStopPolling={(fn) => setStopPollingFn(() => fn)}
         />
       </ScrollView>
     </View>

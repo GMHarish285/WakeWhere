@@ -1,16 +1,24 @@
 import { startLocationTracking } from "@/services/locationService";
-import { Config, deleteConfig, getConfigs } from "@/storage/configStorage";
+import {
+  Config,
+  deleteConfig,
+  getConfigs,
+  getTrackingState,
+} from "@/storage/configStorage";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { CreateConfig } from "./CreateConfig";
 import { SavedConfigCard } from "./SavedConfigCard";
+
+const TRACKING_STATUS_UPDATE_INTERVAL = 5000;
 
 type SavedConfigProps = {
   setActiveConfig: (config: Config) => void;
   setDist: (distance: number) => void;
   setCurrentLat: (distance: number) => void;
   setCurrentLon: (distance: number) => void;
+  onStopPolling: (fn: () => void) => void;
 };
 
 export function SavedConfig({
@@ -18,10 +26,12 @@ export function SavedConfig({
   setDist,
   setCurrentLat,
   setCurrentLon,
+  onStopPolling,
 }: SavedConfigProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [configs, setConfigs] = useState<Config[]>([]);
   const [editingConfig, setEditingConfig] = useState<Config | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   async function loadConfigs() {
     const configs = await getConfigs();
@@ -42,15 +52,36 @@ export function SavedConfig({
     setShowPopup(true);
   }
 
+  function stopPolling() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
+
   function handleStartTracking(config: Config) {
     setActiveConfig(config);
 
-    startLocationTracking(config, ({ dist, lat, lon }) => {
-    //   console.log("Location update:", lat, lon, dist);
+    startLocationTracking(config);
 
-      setDist(dist);
-      setCurrentLat(lat);
-      setCurrentLon(lon);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(async () => {
+      const state = await getTrackingState();
+      if (!state) return;
+
+      setCurrentLat(state.lat);
+      setCurrentLon(state.lon);
+      setDist(state.dist);
+    }, TRACKING_STATUS_UPDATE_INTERVAL);
+
+    onStopPolling(() => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     });
   }
 

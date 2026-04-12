@@ -60,3 +60,42 @@ export async function deleteConfig(id: string) {
     throw new Error("Failed to delete config.", { cause: e });
   }
 }
+
+const ACTIVE_CONFIG_KEY = "activeConfig";
+
+export async function saveActiveConfig(state: Config) {
+  await AsyncStorage.setItem(ACTIVE_CONFIG_KEY, JSON.stringify(state));
+}
+
+export async function getActiveConfig(): Promise<Config | null> {
+  const data = await AsyncStorage.getItem(ACTIVE_CONFIG_KEY);
+  if (!data) return null;
+  return JSON.parse(data);
+}
+
+export async function clearActiveConfig() {
+  await AsyncStorage.removeItem(ACTIVE_CONFIG_KEY);
+}
+
+
+const TRACKING_STATE_KEY = "trackingState";
+
+export type TrackingState = {
+  lat: number;
+  lon: number;
+  dist: number;
+};
+
+export async function saveTrackingState(state: TrackingState) {
+  await AsyncStorage.setItem(TRACKING_STATE_KEY, JSON.stringify(state));
+}
+
+export async function getTrackingState(): Promise<TrackingState | null> {
+  const data = await AsyncStorage.getItem(TRACKING_STATE_KEY);
+  if (!data) return null;
+  return JSON.parse(data);
+}
+
+export async function clearTrackingState() {
+  await AsyncStorage.removeItem(TRACKING_STATE_KEY);
+}

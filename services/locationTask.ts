@@ -1,34 +1,31 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getActiveConfig, saveTrackingState } from "@/storage/configStorage";
 import * as TaskManager from "expo-task-manager";
 import { Alert } from "react-native";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  if (error) {
+  if (error || !data) {
     // console.log("Location task error:", error);
     return;
   }
 
-  if (!data) return;
-
-  const { locations } = data as any;
+  const { locations } = data as any; // TODO: fix type checking
   const location = locations[0];
 
   const lat = location.coords.latitude;
   const lon = location.coords.longitude;
 
-  const configJSON = await AsyncStorage.getItem("activeConfig");
+  const activeConfig = await getActiveConfig();
+  if (!activeConfig) return;
 
-  if (!configJSON) return;
-
-  const config = JSON.parse(configJSON);
-
-  const dist = calculateDistance(lat, lon, config.lat, config.lon);
+  const dist = calculateDistance(lat, lon, activeConfig.lat, activeConfig.lon);
 
   //   console.log("BG distance:", dist);
 
-  if (dist <= config.thres) {
+  await saveTrackingState({ lat, lon, dist });
+
+  if (dist <= activeConfig.thres) {
     Alert.alert("Destination reached");
   }
 });
@@ -40,7 +37,6 @@ function calculateDistance(
   lon2: number,
 ) {
   const R = 6371000;
-
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
   const dLat = toRad(lat2 - lat1);
