@@ -1,8 +1,9 @@
 import { SavedConfig } from "@/components/SavedConfig";
 import { TrackingStatus } from "@/components/TrackingStatus";
 import { stopLocationTracking } from "@/services/locationService";
+import { setupTrackingNotification } from "@/services/notificationService";
 import { Config } from "@/storage/configStorage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Index() {
@@ -11,6 +12,10 @@ export default function Index() {
   const [currentLat, setCurrentLat] = useState<number | null>(null);
   const [currentLon, setCurrentLon] = useState<number | null>(null);
   const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
+
+  useEffect(() => {
+    setupTrackingNotification();
+  }, []);
 
   function handleStopTracking() {
     stopLocationTracking();

@@ -30,6 +30,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.harishgm.wakewhere",
       "permissions": [
+        "POST_NOTIFICATIONS",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
@@ -61,6 +62,9 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
+      ],
+      [
+        "expo-notifications"
       ]
     ],
     "experiments": {

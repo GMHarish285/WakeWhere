@@ -1,6 +1,7 @@
 import { getActiveConfig, saveTrackingState } from "@/storage/configStorage";
 import * as TaskManager from "expo-task-manager";
 import { Alert } from "react-native";
+import { updateTrackingNotification } from "./notificationService";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -24,6 +25,8 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   //   console.log("BG distance:", dist);
 
   await saveTrackingState({ lat, lon, dist });
+
+  await updateTrackingNotification(dist);
 
   if (dist <= activeConfig.thres) {
     Alert.alert("Destination reached");
