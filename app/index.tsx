@@ -2,8 +2,12 @@ import { SavedConfig } from "@/components/SavedConfig";
 import { TrackingStatus } from "@/components/TrackingStatus";
 import { stopLocationTracking } from "@/services/locationService";
 import { setupTrackingNotification } from "@/services/notificationService";
-import { Config } from "@/storage/configStorage";
-import { useEffect, useState } from "react";
+import {
+  Config,
+  getActiveConfig,
+  getTrackingState,
+} from "@/storage/configStorage";
+import { useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Index() {
@@ -11,7 +15,65 @@ export default function Index() {
   const [distance, setDistance] = useState<number | null>(null);
   const [currentLat, setCurrentLat] = useState<number | null>(null);
   const [currentLon, setCurrentLon] = useState<number | null>(null);
-  const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
+  // const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    async function loadTrackingState() {
+      const config = await getActiveConfig();
+      if (config) {
+        setActiveConfig(config);
+        const state = await getTrackingState();
+        if (state) {
+          setCurrentLat(state.lat);
+          setCurrentLon(state.lon);
+          setDistance(state.dist);
+        } else {
+          setActiveConfig(null);
+          return;
+        }
+
+        startPolling();
+      }
+    }
+
+    loadTrackingState();
+  }, []);
+
+  function startPolling() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(async () => {
+      const state = await getTrackingState();
+      if (!state) {
+        setActiveConfig(null);
+        setDistance(null);
+        setCurrentLat(null);
+        setCurrentLon(null);
+
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+
+        return;
+      }
+
+      setCurrentLat(state.lat);
+      setCurrentLon(state.lon);
+      setDistance(state.dist);
+    }, 5000);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setupTrackingNotification();
@@ -19,13 +81,33 @@ export default function Index() {
 
   function handleStopTracking() {
     stopLocationTracking();
-    if (stopPollingFn) {
-      stopPollingFn();
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
+
+    // if (stopPollingFn) {
+    //   stopPollingFn();
+    // }
+
     setActiveConfig(null);
     setDistance(null);
     setCurrentLat(null);
     setCurrentLon(null);
+  }
+
+  async function handleStartTracking(config: Config) {
+    setActiveConfig(config);
+
+    const state = await getTrackingState();
+    if (state) {
+      setCurrentLat(state.lat);
+      setCurrentLon(state.lon);
+      setDistance(state.dist);
+    }
+
+    startPolling();
   }
 
   return (
@@ -44,11 +126,11 @@ export default function Index() {
         />
 
         <SavedConfig
-          setActiveConfig={setActiveConfig}
+          setActiveConfig={handleStartTracking}
           setDist={setDistance}
           setCurrentLat={setCurrentLat}
           setCurrentLon={setCurrentLon}
-          onStopPolling={(fn) => setStopPollingFn(() => fn)}
+          // onStopPolling={(fn) => setStopPollingFn(() => fn)}
         />
       </ScrollView>
     </View>
