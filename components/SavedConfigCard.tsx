@@ -6,6 +6,7 @@ type SavedConfigCardProps = {
   onEdit?: () => void;
   onDelete?: () => void;
   onStart?: () => void;
+  disabled?: boolean;
 };
 
 export function SavedConfigCard({
@@ -13,6 +14,7 @@ export function SavedConfigCard({
   onStart,
   onEdit,
   onDelete,
+  disabled,
 }: SavedConfigCardProps) {
   return (
     <View className="border border-gray-200 bg-white rounded-lg p-4 gap-3">
@@ -37,8 +39,8 @@ export function SavedConfigCard({
 
       <View className="flex-row gap-3 mt-2">
         <Pressable
-          className="flex-1 bg-blue-600 py-2 rounded-lg items-center"
-          onPress={onStart}
+          className={`flex-1 py-2 rounded-lg items-center ${disabled ? "bg-gray-400" : "bg-blue-600"}`}
+          onPress={disabled ? undefined : onStart}
         >
           <Text className="text-white font-medium">Start</Text>
         </Pressable>

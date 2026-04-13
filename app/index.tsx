@@ -131,6 +131,7 @@ export default function Index() {
           setCurrentLat={setCurrentLat}
           setCurrentLon={setCurrentLon}
           // onStopPolling={(fn) => setStopPollingFn(() => fn)}
+          activeConfig={activeConfig}
         />
       </ScrollView>
     </View>
