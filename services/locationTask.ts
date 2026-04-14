@@ -1,7 +1,16 @@
-import { getActiveConfig, getAlarmTriggered, saveTrackingState, setAlarmTriggered } from "@/storage/configStorage";
+import {
+  getActiveConfig,
+  getAlarmTriggered,
+  saveTrackingState,
+  setAlarmTriggered,
+} from "@/storage/configStorage";
 import * as TaskManager from "expo-task-manager";
-import { clearTrackingNotification, triggerAlarmNotification, updateTrackingNotification } from "./notificationService";
 import { stopLocationTracking } from "./locationService";
+import {
+  clearTrackingNotification,
+  triggerAlarm,
+  updateTrackingNotification,
+} from "./notifeeService";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -32,9 +41,8 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   if (dist <= activeConfig.thres && !alreadyTriggered) {
     await setAlarmTriggered(true);
-    await triggerAlarmNotification();
+    await triggerAlarm();
     await stopLocationTracking();
-    await clearTrackingNotification();
   }
 });
 

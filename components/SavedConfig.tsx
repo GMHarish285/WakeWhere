@@ -10,18 +10,18 @@ const TRACKING_STATUS_UPDATE_INTERVAL = 5000;
 
 type SavedConfigProps = {
   setActiveConfig: (config: Config) => void;
-  setDist: (distance: number) => void;
-  setCurrentLat: (distance: number) => void;
-  setCurrentLon: (distance: number) => void;
+  // setDist: (distance: number) => void;
+  // setCurrentLat: (distance: number) => void;
+  // setCurrentLon: (distance: number) => void;
   // onStopPolling: (fn: () => void) => void;
   activeConfig: Config | null;
 };
 
 export function SavedConfig({
   setActiveConfig,
-  setDist,
-  setCurrentLat,
-  setCurrentLon,
+  // setDist,
+  // setCurrentLat,
+  // setCurrentLon,
   // onStopPolling,
   activeConfig,
 }: SavedConfigProps) {
@@ -105,7 +105,7 @@ export function SavedConfig({
           onDelete={() => handleDeleteConfig(config.id)}
           onEdit={() => handleEditConfig(config)}
           onStart={() => handleStartTracking(config)}
-          disabled={!!activeConfig}
+          disabled={!!activeConfig} // TODO: disable only current tracking config ensuring no race conditions occur in backend
         />
       ))}
 

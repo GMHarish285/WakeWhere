@@ -7,10 +7,7 @@ import {
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 import LOCATION_TASK_NAME from "./locationTask";
-import {
-  clearTrackingNotification,
-  updateTrackingNotification,
-} from "./notificationService";
+import { clearTrackingNotification, updateTrackingNotification } from "./notifeeService";
 
 const UPDATE_INTERVAL = 5000;
 
@@ -76,8 +73,6 @@ export async function startLocationTracking(config: Config) {
       notificationBody: " ",
     },
   });
-
-  await updateTrackingNotification(0);
 
   await clearAlarmTriggered();
 }

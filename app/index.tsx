@@ -1,7 +1,8 @@
 import { SavedConfig } from "@/components/SavedConfig";
 import { TrackingStatus } from "@/components/TrackingStatus";
 import { stopLocationTracking } from "@/services/locationService";
-import { setupTrackingNotification } from "@/services/notificationService";
+import { registerNotifeeEvents } from "@/services/notifeeEvents";
+import { setupNotifeeChannels } from "@/services/notifeeService";
 import {
   Config,
   getActiveConfig,
@@ -9,6 +10,8 @@ import {
 } from "@/storage/configStorage";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
+
+registerNotifeeEvents();
 
 export default function Index() {
   const [activeConfig, setActiveConfig] = useState<Config | null>(null);
@@ -45,25 +48,26 @@ export default function Index() {
       clearInterval(intervalRef.current);
     }
 
-    intervalRef.current = setInterval(async () => {
-      const state = await getTrackingState();
-      if (!state) {
-        setActiveConfig(null);
-        setDistance(null);
-        setCurrentLat(null);
-        setCurrentLon(null);
+    intervalRef.current = setInterval(() => {
+      getTrackingState().then((state) => {
+        if (!state) {
+          setActiveConfig(null);
+          setDistance(null);
+          setCurrentLat(null);
+          setCurrentLon(null);
 
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+
+          return;
         }
 
-        return;
-      }
-
-      setCurrentLat(state.lat);
-      setCurrentLon(state.lon);
-      setDistance(state.dist);
+        setCurrentLat(state.lat);
+        setCurrentLon(state.lon);
+        setDistance(state.dist);
+      });
     }, 5000);
   }
 
@@ -76,7 +80,7 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    setupTrackingNotification();
+    setupNotifeeChannels();
   }, []);
 
   function handleStopTracking() {
@@ -127,9 +131,9 @@ export default function Index() {
 
         <SavedConfig
           setActiveConfig={handleStartTracking}
-          setDist={setDistance}
-          setCurrentLat={setCurrentLat}
-          setCurrentLon={setCurrentLon}
+          // setDist={setDistance}
+          // setCurrentLat={setCurrentLat}
+          // setCurrentLon={setCurrentLon}
           // onStopPolling={(fn) => setStopPollingFn(() => fn)}
           activeConfig={activeConfig}
         />

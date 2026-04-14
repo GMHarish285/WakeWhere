@@ -1,4 +1,4 @@
-change "config" to "destination", "stop" or "location"
 auto stop tracking on reaching location
 dismissable alarm instead of sound notification
-when app is closed when a tracking is active, bg task is running but tracking status ui says not tracking
+cell tower location
+migrate notifications to notifee
