@@ -1,4 +1,4 @@
 auto stop tracking on reaching location
-dismissable alarm instead of sound notification
+dismissable alarm instead of sound notification - use expo-audio(but wont work if app is killed)
 cell tower location
-migrate notifications to notifee
+make track button work
