@@ -3,6 +3,7 @@ import { TrackingStatus } from "@/components/TrackingStatus";
 import { stopLocationTracking } from "@/services/locationService";
 import { registerNotifeeEvents } from "@/services/notifeeEvents";
 import { setupNotifeeChannels } from "@/services/notifeeService";
+import { getAlarmState } from "@/storage/alarmStateStorage";
 import {
   Config,
   getActiveConfig,
@@ -20,6 +21,18 @@ export default function Index() {
   const [currentLon, setCurrentLon] = useState<number | null>(null);
   // const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    async function checkAlarmState() {
+      const state = await getAlarmState();
+
+      if (state === "ringing") {
+        console.log("Alarm was ringing, restore UI");
+      }
+    }
+
+    checkAlarmState();
+  }, []);
 
   useEffect(() => {
     async function loadTrackingState() {

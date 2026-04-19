@@ -1,16 +1,10 @@
-import {
-  getActiveConfig,
-  getAlarmTriggered,
-  saveTrackingState,
-  setAlarmTriggered,
-} from "@/storage/configStorage";
+import { getAlarmConfig } from "@/storage/alarmConfigStorage";
+import { getAlarmState } from "@/storage/alarmStateStorage";
+import { getActiveConfig, saveTrackingState } from "@/storage/configStorage";
+import { transitionAlarmStateTo } from "@/utils/alarmUtils";
 import * as TaskManager from "expo-task-manager";
 import { stopLocationTracking } from "./locationService";
-import {
-  clearTrackingNotification,
-  triggerAlarm,
-  updateTrackingNotification,
-} from "./notifeeService";
+import { triggerAlarm, updateTrackingNotification } from "./notifeeService";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -37,11 +31,19 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   await updateTrackingNotification(dist);
 
-  const alreadyTriggered = await getAlarmTriggered();
+  const alarmState = await getAlarmState();
+  if (alarmState !== "tracking") return;
 
-  if (dist <= activeConfig.thres && !alreadyTriggered) {
-    await setAlarmTriggered(true);
+  const alarmConfig = await getAlarmConfig();
+  if (!alarmConfig) {
+    console.log("No alarm sound configured");
+    return;
+  }
+
+  if (dist <= activeConfig.thres) {
+    await transitionAlarmStateTo("triggered");
     await triggerAlarm();
+    await transitionAlarmStateTo("ringing");
     await stopLocationTracking();
   }
 });

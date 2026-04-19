@@ -1,3 +1,4 @@
+import { transitionAlarmStateTo } from "@/utils/alarmUtils";
 import notifee, { EventType } from "@notifee/react-native";
 import { ALARM_NOTIFICATION_ID, STOP_ALARM_ACTION_ID } from "./notifeeService";
 
@@ -21,4 +22,5 @@ export function registerNotifeeEvents() {
 
 export async function stopAlarm() {
   await notifee.cancelNotification(ALARM_NOTIFICATION_ID);
+  await transitionAlarmStateTo("stopped");
 }

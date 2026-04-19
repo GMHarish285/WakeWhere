@@ -1,13 +1,14 @@
+import { getAlarmState } from "@/storage/alarmStateStorage";
 import {
   clearActiveConfig,
-  clearAlarmTriggered,
   Config,
   saveActiveConfig,
 } from "@/storage/configStorage";
+import { transitionAlarmStateTo } from "@/utils/alarmUtils";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 import LOCATION_TASK_NAME from "./locationTask";
-import { clearTrackingNotification, updateTrackingNotification } from "./notifeeService";
+import { clearTrackingNotification } from "./notifeeService";
 
 const UPDATE_INTERVAL = 5000;
 
@@ -74,7 +75,8 @@ export async function startLocationTracking(config: Config) {
     },
   });
 
-  await clearAlarmTriggered();
+  await transitionAlarmStateTo("idle");
+  await transitionAlarmStateTo("tracking");
 }
 
 export async function stopLocationTracking() {
@@ -88,4 +90,9 @@ export async function stopLocationTracking() {
   await clearActiveConfig();
 
   await clearTrackingNotification();
+
+  const alarmState = await getAlarmState();
+  if (alarmState !== "ringing") {
+    await transitionAlarmStateTo("idle");
+  }
 }
