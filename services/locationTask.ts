@@ -5,6 +5,7 @@ import { transitionAlarmStateTo } from "@/utils/alarmUtils";
 import * as TaskManager from "expo-task-manager";
 import { stopLocationTracking } from "./locationService";
 import { triggerAlarm, updateTrackingNotification } from "./notifeeService";
+import { startNativeAlarm } from "@/utils/nativeAlarm";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
@@ -34,15 +35,21 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   const alarmState = await getAlarmState();
   if (alarmState !== "tracking") return;
 
-  const alarmConfig = await getAlarmConfig();
-  if (!alarmConfig) {
-    console.log("No alarm sound configured");
-    return;
-  }
+  // const alarmConfig = await getAlarmConfig();
+  // if (!alarmConfig) {
+  //   console.log("No alarm sound configured");
+  //   return;
+  // }
 
   if (dist <= activeConfig.thres) {
     await transitionAlarmStateTo("triggered");
     await triggerAlarm();
+
+    const config = await getAlarmConfig();
+    if (config?.uri) {
+      startNativeAlarm(config.uri);
+    }
+    
     await transitionAlarmStateTo("ringing");
     await stopLocationTracking();
   }
