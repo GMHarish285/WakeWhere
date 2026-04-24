@@ -1,4 +1,23 @@
-package com.harishgm.wakewhere
+const { withDangerousMod } = require("@expo/config-plugins");
+const fs = require("fs");
+const path = require("path");
+
+module.exports = function withAlarmServiceFile(config) {
+  return withDangerousMod(config, [
+    "android",
+    async (config) => {
+      const projectRoot = config.modRequest.projectRoot;
+      const pkg = config.android.package;
+
+      const dirPath = path.join(
+        projectRoot,
+        "android/app/src/main/java",
+        ...pkg.split("."),
+      );
+
+      const filePath = path.join(dirPath, "AlarmService.kt");
+
+      const content = `package ${pkg}
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -71,3 +90,15 @@ class AlarmService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+`;
+
+      fs.mkdirSync(dirPath, { recursive: true });
+
+      if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, content);
+      }
+
+      return config;
+    },
+  ]);
+};

@@ -13,9 +13,8 @@ import com.facebook.react.common.ReleaseLevel
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import com.facebook.react.defaults.DefaultReactNativeHost
 
-import com.harishgm.wakewhere.AlarmPackage
-
 import expo.modules.ApplicationLifecycleDispatcher
+import com.harishgm.wakewhere.AlarmPackage
 import expo.modules.ReactNativeHostWrapper
 
 class MainApplication : Application(), ReactApplication {
