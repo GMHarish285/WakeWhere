@@ -1,4 +1,5 @@
 import { Config } from "@/storage/configStorage";
+import { formatCoord } from "@/utils/formatCoord";
 import { Pressable, Text, View } from "react-native";
 
 type SavedConfigCardProps = {
@@ -23,12 +24,12 @@ export function SavedConfigCard({
       <View className="flex-row justify-between">
         <View className="flex-row gap-2">
           <Text className="text-gray-600">Lat</Text>
-          <Text className="font-medium">{config.lat}</Text>
+          <Text className="font-medium">{formatCoord(config.lat)}</Text>
         </View>
 
         <View className="flex-row gap-2">
           <Text className="text-gray-600">Lon</Text>
-          <Text className="font-medium">{config.lon}</Text>
+          <Text className="font-medium">{formatCoord(config.lon)}</Text>
         </View>
       </View>
 

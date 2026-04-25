@@ -1,4 +1,5 @@
 import { Config } from "@/storage/configStorage";
+import { formatCoord } from "@/utils/formatCoord";
 import { Pressable, Text, View } from "react-native";
 
 type TrackingStatusProps = {
@@ -29,12 +30,12 @@ export function TrackingStatus({
             <View className="flex-row justify-between">
               <View className="flex-row gap-2">
                 <Text className="text-gray-600">Dest Lat</Text>
-                <Text className="font-medium">{config.lat}</Text>
+                <Text className="font-medium">{formatCoord(config.lat)}</Text>
               </View>
 
               <View className="flex-row gap-2">
                 <Text className="text-gray-600">Dest Lon</Text>
-                <Text className="font-medium">{config.lon}</Text>
+                <Text className="font-medium">{formatCoord(config.lon)}</Text>
               </View>
             </View>
 
@@ -43,14 +44,14 @@ export function TrackingStatus({
               <View className="flex-row gap-2">
                 <Text className="text-gray-600">Curr Lat</Text>
                 <Text className="font-medium">
-                  {lat ? lat.toFixed(6) : "Loading..."}
+                  {lat !== null ? formatCoord(lat) : "Loading..."}
                 </Text>
               </View>
 
               <View className="flex-row gap-2">
                 <Text className="text-gray-600">Curr Lon</Text>
                 <Text className="font-medium">
-                  {lon ? lon.toFixed(6) : "Loading..."}
+                  {lon !== null ? formatCoord(lon) : "Loading..."}
                 </Text>
               </View>
             </View>
