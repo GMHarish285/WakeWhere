@@ -1,65 +1,113 @@
 import { setSelectedLocation } from "@/utils/mapSelectionStore";
+import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { LeafletView } from "react-native-leaflet-view";
 
-interface MapMessage {
-  event?: string;
-  payload?: {
-    touchLatLng?: {
-      lat: number;
-      lng: number;
-    };
-  };
-}
-
-const DEFAULT_LOCATION = {
-  latitude: 20, 
-  longitude: 0,
+type MapLocation = {
+  lat: number;
+  lng: number;
 };
 
 export default function MapScreen() {
-  const [marker, setMarker] = useState(DEFAULT_LOCATION);
-  const [zoom, setZoom] = useState(2);
+  const [html, setHtml] = useState<string | null>(null);
+  const [location, setLocation] = useState<MapLocation | null>(null);
 
-  const handleMessage = useCallback((message: MapMessage) => {
-    if (message?.event === "onMapClicked") {
-      const { lat, lng } = message.payload?.touchLatLng || {};
+  useEffect(() => {
+    let mounted = true;
 
-      if (lat !== undefined && lng !== undefined) {
-        setMarker({ latitude: lat, longitude: lng });
-        setZoom(16);
+    const loadHtml = async () => {
+      try {
+        const asset = Asset.fromModule(require("../assets/leaflet.html"));
+        await asset.downloadAsync();
+
+        const content = await FileSystem.readAsStringAsync(asset.localUri!);
+
+        if (mounted) {
+          setHtml(content);
+        }
+      } catch (e) {
+        console.error("HTML load error:", e);
       }
-    }
+    };
+
+    loadHtml();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  function handleMessage(msg: any) {
+    try {
+      const data = typeof msg === "string" ? JSON.parse(msg) : msg;
+
+      // react-native-leaflet-view default event
+      if (data?.event === "onMapClicked") {
+        const { lat, lng } = data.payload.touchLatLng;
+
+        setLocation({ lat, lng });
+      }
+    } catch (e) {
+      console.warn("Map message error:", e);
+    }
+  }
+
   function handleConfirm() {
+    if (!location) return;
+
     setSelectedLocation({
-      lat: marker.latitude,
-      lon: marker.longitude,
+      lat: location.lat,
+      lon: location.lng,
     });
 
     router.back();
   }
 
+  if (!html) {
+    return <ActivityIndicator size="large" />;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <LeafletView
-        mapCenterPosition={marker}
-        zoom={zoom}
+        source={{ html }}
+        mapCenterPosition={
+          location
+            ? { lat: location.lat, lng: location.lng }
+            : { lat: 20, lng: 79 }
+        }
+        zoom={location ? 16 : 2}
         onMessageReceived={handleMessage}
-        mapMarkers={[
-          {
-            id: "selected",
-            position: marker,
-            icon: "📍",
-          },
-        ]}
+        mapMarkers={
+          location
+            ? [
+                {
+                  id: "selected",
+                  position: {
+                    lat: location.lat,
+                    lng: location.lng,
+                  },
+                  icon: "https://cdn-icons-png.flaticon.com/64/2776/2776067.png",
+                  size: [32, 32],
+                  iconAnchor: [16, 32],
+                },
+              ]
+            : []
+        }
       />
 
-      {/* Confirm Button */}
-      <View style={{ position: "absolute", bottom: 30, left: 20, right: 20 }}>
+      {/* Confirm button */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 30,
+          left: 20,
+          right: 20,
+        }}
+      >
         <Pressable
           onPress={handleConfirm}
           style={{

@@ -67,7 +67,8 @@
       "./plugins/withAlarmPackageFile.js",
       "./plugins/withAlarmMainApplication.js",
       "./plugins/withAlarmManifest.js",
-      "./plugins/withAlarmModuleFile.js"
+      "./plugins/withAlarmModuleFile.js",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
