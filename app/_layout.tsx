@@ -39,6 +39,13 @@ export default function RootLayout() {
             title: "Settings",
           }}
         />
+
+      <Stack.Screen
+        name="map"
+        options={{
+          title: "Select Location",
+        }}
+      />
       </Stack>
 
       <StatusBar style="auto" />

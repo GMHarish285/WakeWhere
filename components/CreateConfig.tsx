@@ -1,6 +1,12 @@
 import { addConfig, Config, updateConfig } from "@/storage/configStorage";
+import {
+  clearSelectedLocation,
+  getSelectedLocation,
+} from "@/utils/mapSelectionStore";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, Text, TextInput, View } from "react-native";
 
 type CreateConfigPopupProps = {
@@ -111,6 +117,20 @@ export function CreateConfig({
     }
   }, [config, visible]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!visible) return;
+
+      const loc = getSelectedLocation();
+
+      if (loc) {
+        setLat(loc.lat.toString());
+        setLon(loc.lon.toString());
+        clearSelectedLocation();
+      }
+    }, [visible]),
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/40 items-center justify-center">
@@ -163,6 +183,13 @@ export function CreateConfig({
                 <Text className="text-red-500 text-xs">{lonErr}</Text>
               ) : null}
             </View>
+
+            <Pressable
+              onPress={() => router.push("/map")}
+              className="bg-purple-600 p-2 rounded-lg items-center"
+            >
+              <Text className="text-white font-medium">Pick from Map</Text>
+            </Pressable>
 
             <View className="gap-1">
               <Text className="text-gray-600">Threshold (m)</Text>
