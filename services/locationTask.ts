@@ -1,13 +1,34 @@
 import { getAlarmConfig } from "@/storage/alarmConfigStorage";
 import { getAlarmState } from "@/storage/alarmStateStorage";
 import { getActiveConfig, saveTrackingState } from "@/storage/configStorage";
+import {
+  getCurrentTrackingMode,
+  setCurrentTrackingMode,
+  TRACKING_MODES,
+  TrackingMode,
+} from "@/storage/trackingModeStorage";
 import { transitionAlarmStateTo } from "@/utils/alarmUtils";
+import { startNativeAlarm } from "@/utils/nativeAlarm";
+import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { stopLocationTracking } from "./locationService";
 import { triggerAlarm, updateTrackingNotification } from "./notifeeService";
-import { startNativeAlarm } from "@/utils/nativeAlarm";
 
 const LOCATION_TASK_NAME = "background-location-task";
+
+function getTrackingMode(
+  distance: number,
+  currentMode?: TrackingMode,
+): TrackingMode {
+  if (currentMode === "VERY_NEAR" && distance < 1050) return "VERY_NEAR";
+  if (currentMode === "NEAR" && distance < 2100) return "NEAR";
+  if (currentMode === "MID" && distance < 5200) return "MID";
+
+  if (distance > 5000) return "FAR";
+  if (distance > 2000) return "MID";
+  if (distance > 1000) return "NEAR";
+  return "VERY_NEAR";
+}
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (error || !data) {
@@ -30,7 +51,41 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   await saveTrackingState({ lat, lon, dist });
 
-  await updateTrackingNotification(dist);
+  const currentMode = await getCurrentTrackingMode();
+
+  await updateTrackingNotification(dist, currentMode);
+
+  const newMode = getTrackingMode(dist, currentMode ?? undefined);
+
+  if (newMode !== currentMode) {
+    const config = TRACKING_MODES[newMode];
+
+    try {
+      const started =
+        await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+
+      if (started) {
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+      }
+
+      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+        ...config,
+        showsBackgroundLocationIndicator: true,
+        foregroundService: {
+          notificationTitle: "Tracking location",
+          notificationBody: `${Math.round(dist)}m • ${newMode}`,
+        },
+      });
+
+      await setCurrentTrackingMode(newMode);
+
+      console.log("Switched mode →", newMode);
+    } catch (e) {
+      console.log("Mode switch failed:", e);
+    }
+
+    return;
+  }
 
   const alarmState = await getAlarmState();
   if (alarmState !== "tracking") return;
@@ -49,7 +104,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     if (config?.uri) {
       startNativeAlarm(config.uri);
     }
-    
+
     await transitionAlarmStateTo("ringing");
     await stopLocationTracking();
   }

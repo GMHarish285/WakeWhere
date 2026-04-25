@@ -1,3 +1,4 @@
+import { TrackingMode } from "@/storage/trackingModeStorage";
 import notifee, {
   AndroidCategory,
   AndroidImportance,
@@ -9,7 +10,7 @@ export const ALARM_CHANNEL_ID = "alarm-channel";
 const TRACKING_NOTIFICATION_ID = "tracking-notification";
 export const ALARM_NOTIFICATION_ID = "alarm-notification";
 
-export const STOP_ALARM_ACTION_ID = "stop-alarm-action"
+export const STOP_ALARM_ACTION_ID = "stop-alarm-action";
 
 export async function setupNotifeeChannels() {
   await notifee.createChannel({
@@ -25,11 +26,14 @@ export async function setupNotifeeChannels() {
   });
 }
 
-export async function updateTrackingNotification(dist: number) {
+export async function updateTrackingNotification(
+  dist: number,
+  mode: TrackingMode,
+) {
   await notifee.displayNotification({
     id: TRACKING_NOTIFICATION_ID,
     title: "Tracking Active",
-    body: `Distance remaining: ${Math.round(dist)} m`,
+    body: `Distance remaining: ${Math.round(dist)} m • ${mode}`,
     android: {
       channelId: TRACKING_CHANNEL_ID,
       ongoing: true,
@@ -57,7 +61,9 @@ export async function triggerAlarm() {
       ongoing: true,
       autoCancel: false,
       pressAction: { id: "default" },
-      actions: [{ title: "Stop Alarm", pressAction: { id: STOP_ALARM_ACTION_ID } }],
+      actions: [
+        { title: "Stop Alarm", pressAction: { id: STOP_ALARM_ACTION_ID } },
+      ],
     },
   });
 }

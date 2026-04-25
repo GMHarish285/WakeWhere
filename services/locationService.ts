@@ -4,6 +4,10 @@ import {
   Config,
   saveActiveConfig,
 } from "@/storage/configStorage";
+import {
+  clearTrackingMode,
+  setCurrentTrackingMode,
+} from "@/storage/trackingModeStorage";
 import { transitionAlarmStateTo } from "@/utils/alarmUtils";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
@@ -64,8 +68,10 @@ export async function startLocationTracking(config: Config) {
 
   await saveActiveConfig(config);
 
+  await setCurrentTrackingMode("VERY_NEAR");
+
   await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-    accuracy: Location.Accuracy.BestForNavigation,
+    accuracy: Location.Accuracy.Highest,
     distanceInterval: 5,
     timeInterval: UPDATE_INTERVAL,
     showsBackgroundLocationIndicator: true,
@@ -90,6 +96,8 @@ export async function stopLocationTracking() {
   await clearActiveConfig();
 
   await clearTrackingNotification();
+
+  await clearTrackingMode();
 
   const alarmState = await getAlarmState();
   if (alarmState !== "ringing") {
