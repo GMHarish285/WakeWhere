@@ -27,9 +27,14 @@ export type TrackingMode = keyof typeof TRACKING_MODES;
 
 const TRACKING_MODE_KEY = "tracking_mode";
 
-export async function getCurrentTrackingMode(): Promise<TrackingMode || null> {
+export async function getCurrentTrackingMode(): Promise<TrackingMode | null> {
   const mode = await AsyncStorage.getItem(TRACKING_MODE_KEY);
-  return (mode as TrackingMode) ?? null;
+
+  if (mode && mode in TRACKING_MODES) {
+    return mode as TrackingMode;
+  }
+
+  return null;
 }
 
 export async function setCurrentTrackingMode(trackingMode: TrackingMode) {

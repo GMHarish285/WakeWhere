@@ -53,7 +53,9 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
   const currentMode = await getCurrentTrackingMode();
 
-  await updateTrackingNotification(dist, currentMode);
+  if (currentMode !== null) {
+    await updateTrackingNotification(dist, currentMode);
+  }
 
   const newMode = getTrackingMode(dist, currentMode ?? undefined);
 
