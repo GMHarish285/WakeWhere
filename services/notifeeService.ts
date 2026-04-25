@@ -33,7 +33,7 @@ export async function updateTrackingNotification(
   await notifee.displayNotification({
     id: TRACKING_NOTIFICATION_ID,
     title: "Tracking Active",
-    body: `Distance remaining: ${Math.round(dist)} m • ${mode}`,
+    body: `Distance remaining: ${Math.round(dist)} m`,
     android: {
       channelId: TRACKING_CHANNEL_ID,
       ongoing: true,

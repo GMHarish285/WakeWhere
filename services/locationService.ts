@@ -77,7 +77,7 @@ export async function startLocationTracking(config: Config) {
     showsBackgroundLocationIndicator: true,
     foregroundService: {
       notificationTitle: "Tracking location",
-      notificationBody: " ",
+      notificationBody: "",
     },
   });
 

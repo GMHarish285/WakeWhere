@@ -75,7 +75,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         showsBackgroundLocationIndicator: true,
         foregroundService: {
           notificationTitle: "Tracking location",
-          notificationBody: `${Math.round(dist)}m • ${newMode}`,
+          notificationBody: "",
         },
       });
 
