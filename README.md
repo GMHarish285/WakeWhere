@@ -1,7 +1,7 @@
 # WakeWhere
 
 WakeWhere is a location-based alarm application built using **React Native (Expo)** with **native Android integration**.  
-It automatically triggers a persistent, looping alarm when the user reaches a specified destination - without requiring user interaction at trigger time.
+It automatically triggers an alarm when the user reaches a specified destination.
 
 ---
 
@@ -11,19 +11,24 @@ WakeWhere is designed to solve a common real-world problem: ensuring that a user
 
 WakeWhere uses a hybrid approach:
 - JavaScript (Expo) for tracking, state, and UI
-- Native Android code for reliable alarm playback
+- Native Android code for reliable alarm 
+
+The app is designed to be **fully offline-first**:
+- Location tracking and alarm triggering work without internet
+- Internet is only required for map-based location selection
+
+WakeWhere also ensures **transparent location usage** by maintaining a persistent notification while tracking is active.
 
 ---
 
 ## Features
 
-- Destination-based alarm triggering  
-- Background location tracking  
-- Real-time distance notification  
-- Custom alarm sound selection  
-- Looping alarm playback  
-- Notification-based stop control  
-- State machine-based alarm logic  
+- Destination-based alarm triggering
+- Background location tracking
+- Real-time distance notification
+- Custom alarm sound selection
+- Looping alarm playback
+- Notification-based stop control
 
 ---
 
@@ -72,11 +77,11 @@ WakeWhere uses a two-layer architecture:
 Handles:
 - Location tracking (`expo-location`, `TaskManager`)
 - State management (alarm state machine)
-- Notifications (Notifee)
-- Storage (AsyncStorage)
+- Notifications (`Notifee`)
+- Storage (`AsyncStorage`)
 - UI
 
-State machine:
+Alarm state machine:
 idle → tracking → triggered → ringing → stopped
 
 ---
@@ -87,11 +92,29 @@ Handles:
 - Foreground service lifecycle
 - Audio playback using `MediaPlayer`
 - React Native - Android bridge
+- Native setup via **Expo config plugins**
 
 Core components:
 - `AlarmService.kt`
 - `AlarmModule.kt`
 - `AlarmPackage.kt`
+
+---
+
+## Tech Stack
+
+| Category           | Tools / Technologies |
+|--------------------|--------------------|
+| Framework          | React Native (Expo) |
+| Language           | TypeScript |
+| Styling            | NativeWind |
+| Storage            | AsyncStorage |
+| Location & Tracking| Expo Location, TaskManager |
+| Notifications      | Notifee |
+| Maps               | Leaflet (WebView) |
+| Audio              | Android MediaPlayer |
+| Native Layer       | Kotlin + Expo Config Plugins |
+| Build & Deployment | EAS |
 
 ---
 
@@ -125,6 +148,8 @@ Install EAS CLI:
 
 `npm install -g eas-cli`
 
+The following commands will clone the repository, install dependencies, and build an installable Android APK using EAS:
+
 ```bash
 git clone https://github.com/GMHarish285/WakeWhere.git
 cd WakeWhere
@@ -132,15 +157,10 @@ npm install
 npx eas build -p android --profile preview
 ```
 
-Note:
-Since the repository already includes the `/android` directory with native changes, you do NOT need to run `npx expo prebuild`.
-
 ---
 
 ## Future Improvements
 
 - Snooze functionality
 - Full-screen alarm UI
-- Gradual volume ramping
-- Improved file handling for broader compatibility
 - Optional iOS adaptation (best-effort approach)
