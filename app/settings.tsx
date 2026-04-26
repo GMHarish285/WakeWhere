@@ -75,18 +75,18 @@ export default function Settings() {
           </Text>
         </Pressable>
       ) : (
-        <View className="bg-neutral-900 p-4 rounded-xl gap-4">
+        <View className="bg-white p-4 rounded-xl gap-4 border border-gray-200">
           {/* File + play */}
           <View className="flex-row items-center justify-between">
-            <Text numberOfLines={1} className="text-white flex-1 mr-3">
+            <Text numberOfLines={1} className="text-gray-900 flex-1 mr-3 font-medium">
               {alarm.name}
             </Text>
 
             <Pressable
               onPress={togglePlay}
-              className="bg-neutral-700 px-3 py-2 rounded-lg"
+              className="bg-gray-100 px-3 py-2 rounded-lg"
             >
-              <Text className="text-white text-lg">
+              <Text className="text-gray-800 text-lg">
                 {player.playing ? "Pause" : "Play"}
               </Text>
             </Pressable>
