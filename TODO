@@ -4,10 +4,11 @@ change app logo
 search feature in map
 clean repo
 add light/dark theme toggle
-use curr location feature
+use curr location feature in map
+persistent notification on newer android
 
 publish
-merge
+create eas workflow
 
 npx expo prebuild --platform android --clean
 npx eas build -p android --profile preview

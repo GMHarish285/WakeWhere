@@ -17,7 +17,7 @@ The app is designed to be **fully offline-first**:
 - Location tracking and alarm triggering work without internet
 - Internet is only required for map-based location selection
 
-WakeWhere also ensures **transparent location usage** by maintaining a persistent notification while tracking is active.
+WakeWhere also ensures **transparent location usage** by maintaining a notification while tracking is active.
 
 ---
 
