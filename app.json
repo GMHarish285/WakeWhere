@@ -3,12 +3,20 @@
     "name": "WakeWhere",
     "slug": "wakewhere",
     "version": "1.0.0",
-    "icon": "./assets/images/icon.png",
+    "orientation": "portrait",
+    "icon": "./assets/images/wakewhere_icon.png",
+    "scheme": "wakewhere",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.harishgm.wakewhere",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "WakeWhere uses your location to track your distance to a destination.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "WakeWhere needs background location access to alert you when you reach your destination."
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to track your destination.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app tracks your location even when the app is in the background.",
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -19,8 +27,25 @@
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundColor": "#E6F4FE"
-      }
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.harishgm.wakewhere",
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
@@ -32,7 +57,18 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-audio"
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      "./plugins/withAlarmServiceFile.js",
+      "./plugins/withAlarmPackageFile.js",
+      "./plugins/withAlarmMainApplication.js",
+      "./plugins/withAlarmManifest.js",
+      "./plugins/withAlarmModuleFile.js",
+      "expo-asset"
     ],
     "extra": {
       "eas": {

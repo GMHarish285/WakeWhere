@@ -1,50 +1,166 @@
-# Welcome to your Expo app 👋
+# WakeWhere
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+WakeWhere is a location-based alarm application built using **React Native (Expo)** with **native Android integration**.  
+It automatically triggers an alarm when the user reaches a specified destination.
 
-## Get started
+---
 
-1. Install dependencies
+## Overview
 
-   ```bash
-   npm install
-   ```
+WakeWhere is designed to solve a common real-world problem: ensuring that a user is alerted when they reach a destination, even if the app is in the background or the device is locked.
 
-2. Start the app
+WakeWhere uses a hybrid approach:
+- JavaScript (Expo) for tracking, state, and UI
+- Native Android code for reliable alarm 
 
-   ```bash
-   npx expo start
-   ```
+The app is designed to be **fully offline-first**:
+- Location tracking and alarm triggering work without internet
+- Internet is only required for map-based location selection
 
-In the output, you'll find options to open the app in a
+WakeWhere also ensures **transparent location usage** by maintaining a persistent notification while tracking is active.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Features
 
-## Get a fresh project
+- Destination-based alarm triggering
+- Background location tracking
+- Real-time distance notification
+- Custom alarm sound selection
+- Looping alarm playback
+- Notification-based stop control
 
-When you're ready, run:
+---
+
+## Screenshots
+
+### Tracking
+
+<p align="center">
+  <img src="docs/images/tracking_inapp.jpeg" width="220"/>
+  <img src="docs/images/tracking_notification.jpeg" width="220"/>
+</p>
+
+<p align="center">
+  <sub>Tracking (in app) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tracking (notification)</sub>
+</p>
+
+---
+
+### Alarm
+
+<p align="center">
+  <img src="docs/images/select_sound.jpeg" width="220"/>
+  <img src="docs/images/dest_reached_notification.jpeg" width="220"/>
+</p>
+
+<p align="center">
+  <sub>Alarm Sound Selection &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Alarm Notification</sub>
+</p>
+
+<p align="center">
+  <img src="docs/images/dest_reached_bg.jpeg" width="220"/>
+</p>
+
+<p align="center">
+  <sub>Alarm Notification (in background)</sub>
+</p>
+
+---
+
+## Architecture
+
+WakeWhere uses a two-layer architecture:
+
+### Expo / React Native Layer
+
+Handles:
+- Location tracking (`expo-location`, `TaskManager`)
+- State management (alarm state machine)
+- Notifications (`Notifee`)
+- Storage (`AsyncStorage`)
+- UI
+
+Alarm state machine:
+idle → tracking → triggered → ringing → stopped
+
+---
+
+### Native Android Layer
+
+Handles:
+- Foreground service lifecycle
+- Audio playback using `MediaPlayer`
+- React Native - Android bridge
+- Native setup via **Expo config plugins**
+
+Core components:
+- `AlarmService.kt`
+- `AlarmModule.kt`
+- `AlarmPackage.kt`
+
+---
+
+## Tech Stack
+
+| Category           | Tools / Technologies |
+|--------------------|--------------------|
+| Framework          | React Native (Expo) |
+| Language           | TypeScript |
+| Styling            | NativeWind |
+| Storage            | AsyncStorage |
+| Location & Tracking| Expo Location, TaskManager |
+| Notifications      | Notifee |
+| Maps               | Leaflet (WebView) |
+| Audio              | Android MediaPlayer |
+| Native Layer       | Kotlin + Expo Config Plugins |
+| Build & Deployment | EAS |
+
+---
+
+## Why Native for Alarm Playback?
+
+React Native (and expo) alone cannot reliably support:
+
+- Guaranteed execution when the app is closed  
+- Persistent, looping audio playback  
+- Foreground service behavior  
+
+On Android (especially Android 12+), strict background restrictions prevent reliable alarm behavior using JavaScript alone.
+
+Using a native foreground service with `MediaPlayer` ensures:
+- Continuous playback  
+- System-level reliability  
+- Proper alarm-like behavior  
+
+---
+
+## Installation
+
+# Prerequisites
+
+- Node.js (>= 18 recommended)
+- npm or yarn
+- Android device or emulator
+- EAS CLI
+
+Install EAS CLI:
+
+`npm install -g eas-cli`
+
+The following commands will clone the repository, install dependencies, and build an installable Android APK using EAS:
 
 ```bash
-npm run reset-project
+git clone https://github.com/GMHarish285/WakeWhere.git
+cd WakeWhere
+npm install
+npx eas build -p android --profile preview
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Future Improvements
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Snooze functionality
+- Full-screen alarm UI
+- Optional iOS adaptation (best-effort approach)

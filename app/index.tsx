@@ -1,360 +1,156 @@
-import * as Location from "expo-location";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-import { DestinationInputs } from "../components/DestinationInputs";
-import { SavedDestinationList } from "../components/SavedDestinationList";
-import { SaveNameModal } from "../components/SaveNameModal";
-
-import { loadSavedItems, saveSavedItems } from "../storage/savedDestination";
-import { ActiveTrip } from "../types/ActiveTrip";
-import { SavedItem } from "../types/SavedItem";
-
+import { SavedConfig } from "@/components/SavedConfig";
+import { TrackingStatus } from "@/components/TrackingStatus";
+import { stopLocationTracking } from "@/services/locationService";
+import { registerNotifeeEvents } from "@/services/notifeeEvents";
+import { setupNotifeeChannels } from "@/services/notifeeService";
+import { getAlarmState } from "@/storage/alarmStateStorage";
 import {
-  isValidLatitude,
-  isValidLongitude,
-  isValidThreshold,
-} from "../utils/inputValidation";
+  Config,
+  getActiveConfig,
+  getTrackingState,
+} from "@/storage/configStorage";
+import { useEffect, useRef, useState } from "react";
+import { ScrollView, View } from "react-native";
 
-import { startTrip, stopTrip } from "../services/tripService";
-import { loadActiveTrip } from "../storage/activeTrip";
-import { getDistanceMeters } from "../utils/distance";
+registerNotifeeEvents();
 
-export default function MainScreen() {
-  const router = useRouter();
+export default function Index() {
+  const [activeConfig, setActiveConfig] = useState<Config | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [currentLat, setCurrentLat] = useState<number | null>(null);
+  const [currentLon, setCurrentLon] = useState<number | null>(null);
+  // const [stopPollingFn, setStopPollingFn] = useState<(() => void) | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ----------------------
-  // Destination inputs
-  // ----------------------
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [threshold, setThreshold] = useState("");
-
-  // ----------------------
-  // Saved destinations
-  // ----------------------
-  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState("");
-  const [activeSavedId, setActiveSavedId] = useState<string | null>(null);
-
-  // ----------------------
-  // Tracking state
-  // ----------------------
-  const [isTracking, setIsTracking] = useState(false);
-  const [currentLocation, setCurrentLocation] =
-    useState<Location.LocationObject | null>(null);
-
-  // ----------------------
-  // Load saved destinations
-  // ----------------------
   useEffect(() => {
-    loadSavedItems().then(setSavedItems);
+    async function checkAlarmState() {
+      const state = await getAlarmState();
+
+      if (state === "ringing") {
+        console.log("Alarm was ringing, restore UI");
+      }
+    }
+
+    checkAlarmState();
   }, []);
 
   useEffect(() => {
-    async function restoreActiveTrip() {
-      const trip = await loadActiveTrip();
+    async function loadTrackingState() {
+      const config = await getActiveConfig();
+      if (config) {
+        setActiveConfig(config);
+        const state = await getTrackingState();
+        if (state) {
+          setCurrentLat(state.lat);
+          setCurrentLon(state.lon);
+          setDistance(state.dist);
+        } else {
+          setActiveConfig(null);
+          return;
+        }
 
-      if (!trip) return;
-
-      setLatitude(trip.latitude.toString());
-      setLongitude(trip.longitude.toString());
-      setThreshold(trip.threshold.toString());
-      setIsTracking(true);
+        startPolling();
+      }
     }
 
-    restoreActiveTrip();
+    loadTrackingState();
   }, []);
 
-  // ----------------------
-  // Validation
-  // ----------------------
-  const latitudeValid = isValidLatitude(latitude);
-  const longitudeValid = isValidLongitude(longitude);
-  const thresholdValid = isValidThreshold(threshold);
-
-  const formValid = latitudeValid && longitudeValid && thresholdValid;
-
-  // ----------------------
-  // Distance (derived state)
-  // ----------------------
-  const distanceToDestination =
-    currentLocation && latitude && longitude
-      ? getDistanceMeters(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude,
-          Number(latitude),
-          Number(longitude)
-        )
-      : null;
-
-  // ----------------------
-  // Save destination flow
-  // ----------------------
-  function onSavePress() {
-    if (!formValid) {
-      Alert.alert(
-        "Invalid input",
-        "Please enter valid latitude, longitude, and threshold."
-      );
-      return;
-    }
-    setName("");
-    setModalVisible(true);
-  }
-
-  async function confirmSave() {
-    if (!name.trim()) {
-      Alert.alert("Name required");
-      return;
+  function startPolling() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
 
-    const newItem: SavedItem = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      latitude,
-      longitude,
-      threshold,
-    };
+    intervalRef.current = setInterval(() => {
+      getTrackingState().then((state) => {
+        if (!state) {
+          setActiveConfig(null);
+          setDistance(null);
+          setCurrentLat(null);
+          setCurrentLon(null);
 
-    const updated = [...savedItems, newItem];
-    setSavedItems(updated);
-    await saveSavedItems(updated);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
 
-    setModalVisible(false);
+          return;
+        }
+
+        setCurrentLat(state.lat);
+        setCurrentLon(state.lon);
+        setDistance(state.dist);
+      });
+    }, 5000);
   }
 
-  // ----------------------
-  // Start trip
-  // ----------------------
-  async function onStartTrip() {
-    if (!formValid) {
-      Alert.alert("Invalid input", "Fix destination details first.");
-      return;
-    }
-
-    try {
-      const servicesEnabled = await Location.hasServicesEnabledAsync();
-
-      if (!servicesEnabled) {
-        Alert.alert("Location Disabled", "Please turn on location services.");
-        return;
-      }
-
-      const trip: ActiveTrip = {
-        latitude: Number(latitude),
-        longitude: Number(longitude),
-        threshold: Number(threshold),
-        startedAt: Date.now(),
-      };
-
-      await startTrip(trip);
-      setIsTracking(true);
-    } catch (e: any) {
-      Alert.alert(
-        "Location Required",
-        e.message || "Please allow location access."
-      );
-    }
-  }
-
-  // ----------------------
-  // End trip
-  // ----------------------
-  async function onEndTrip() {
-    await stopTrip();
-    setIsTracking(false);
-    setCurrentLocation(null);
-  }
-
-  // ----------------------
-  // Foreground location updates (UI only)
-  // ----------------------
   useEffect(() => {
-    if (!isTracking) return;
-
-    let subscription: Location.LocationSubscription | null = null;
-
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        distanceInterval: 5,
-      },
-      (loc) => {
-        setCurrentLocation(loc);
-      }
-    ).then((sub) => {
-      subscription = sub;
-    });
-
     return () => {
-      subscription?.remove();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-  }, [isTracking]);
+  }, []);
 
-  async function onTerminateBackgroundTask() {
-    Alert.alert(
-      "Stop Background Tracking",
-      "This will immediately stop all location tracking.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Stop",
-          style: "destructive",
-          onPress: async () => {
-            await stopTrip();
-            setIsTracking(false);
-            setCurrentLocation(null);
-          },
-        },
-      ]
-    );
+  useEffect(() => {
+    setupNotifeeChannels();
+  }, []);
+
+  function handleStopTracking() {
+    stopLocationTracking();
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // if (stopPollingFn) {
+    //   stopPollingFn();
+    // }
+
+    setActiveConfig(null);
+    setDistance(null);
+    setCurrentLat(null);
+    setCurrentLon(null);
   }
 
-  // ----------------------
-  // UI
-  // ----------------------
+  async function handleStartTracking(config: Config) {
+    setActiveConfig(config);
+
+    const state = await getTrackingState();
+    if (state) {
+      setCurrentLat(state.lat);
+      setCurrentLon(state.lon);
+      setDistance(state.dist);
+    }
+
+    startPolling();
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Main Screen</Text>
-
-      <TouchableOpacity onPress={() => router.push("/settings")}>
-        <Text style={styles.link}>Settings</Text>
-      </TouchableOpacity>
-
-      <DestinationInputs
-        latitude={latitude}
-        longitude={longitude}
-        threshold={threshold}
-        editable={!isTracking}
-        latitudeValid={latitudeValid}
-        longitudeValid={longitudeValid}
-        thresholdValid={thresholdValid}
-        setLatitude={(v) => {
-          setLatitude(v);
-          setActiveSavedId(null);
-        }}
-        setLongitude={(v) => {
-          setLongitude(v);
-          setActiveSavedId(null);
-        }}
-        setThreshold={(v) => {
-          setThreshold(v);
-          setActiveSavedId(null);
-        }}
-      />
-
-      {/* Save destination */}
-      <TouchableOpacity
-        onPress={onSavePress}
-        disabled={!formValid || isTracking}
+    <View className="flex-1 bg-gray-100 px-4 py-2 gap-5">
+      <ScrollView
+        className="flex-1 p-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ gap: 15 }}
       >
-        <Text
-          style={[
-            styles.button,
-            (!formValid || isTracking) && { opacity: 0.5 },
-          ]}
-        >
-          Save Destination
-        </Text>
-      </TouchableOpacity>
+        <TrackingStatus
+          config={activeConfig}
+          dist={distance}
+          lat={currentLat}
+          lon={currentLon}
+          onStop={handleStopTracking}
+        />
 
-      {/* Start / End Trip */}
-      <TouchableOpacity onPress={isTracking ? onEndTrip : onStartTrip}>
-        <Text style={styles.startButton}>
-          {isTracking ? "End Trip" : "Start Trip"}
-        </Text>
-      </TouchableOpacity>
-
-      {isTracking && (
-        <TouchableOpacity onPress={onTerminateBackgroundTask}>
-          <Text style={styles.terminateButton}>Stop Background Tracking</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Live location + distance */}
-      {currentLocation && (
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>Current Location</Text>
-          <Text style={styles.mono}>
-            Lat: {currentLocation.coords.latitude.toFixed(5)}
-          </Text>
-          <Text style={styles.mono}>
-            Lon: {currentLocation.coords.longitude.toFixed(5)}
-          </Text>
-
-          {distanceToDestination !== null && (
-            <>
-              <Text style={styles.infoTitle}>Distance to Destination</Text>
-              <Text style={styles.distance}>
-                {Math.round(distanceToDestination)} meters
-              </Text>
-            </>
-          )}
-        </View>
-      )}
-
-      {/* Saved destinations */}
-      <SavedDestinationList
-        items={savedItems}
-        activeSavedId={activeSavedId}
-        onUse={(item) => {
-          setLatitude(item.latitude);
-          setLongitude(item.longitude);
-          setThreshold(item.threshold);
-          setActiveSavedId(item.id);
-        }}
-        onDelete={async (item) => {
-          const filtered = savedItems.filter((i) => i.id !== item.id);
-          setSavedItems(filtered);
-          await saveSavedItems(filtered);
-        }}
-      />
-
-      <SaveNameModal
-        visible={modalVisible}
-        name={name}
-        setName={setName}
-        onCancel={() => setModalVisible(false)}
-        onSave={confirmSave}
-      />
+        <SavedConfig
+          setActiveConfig={handleStartTracking}
+          // setDist={setDistance}
+          // setCurrentLat={setCurrentLat}
+          // setCurrentLon={setCurrentLon}
+          // onStopPolling={(fn) => setStopPollingFn(() => fn)}
+          activeConfig={activeConfig}
+        />
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "600" },
-  link: { color: "blue", marginBottom: 10 },
-  button: { fontWeight: "600", marginVertical: 10 },
-  startButton: {
-    fontWeight: "700",
-    marginVertical: 10,
-    color: "green",
-  },
-  infoBox: {
-    marginTop: 12,
-    alignItems: "center",
-  },
-  infoTitle: {
-    fontWeight: "600",
-    marginTop: 6,
-  },
-  mono: {
-    fontFamily: "monospace",
-    fontSize: 13,
-  },
-  distance: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "green",
-    marginTop: 4,
-  },
-  terminateButton: {
-    marginTop: 8,
-    fontWeight: "700",
-    color: "red",
-  },
-});
