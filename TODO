@@ -8,5 +8,6 @@ use curr location feature
 
 publish
 merge
-add why this app in readme
-update readme
+
+npx expo prebuild --platform android --clean
+npx eas build -p android --profile preview
