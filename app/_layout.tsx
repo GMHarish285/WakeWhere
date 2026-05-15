@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
